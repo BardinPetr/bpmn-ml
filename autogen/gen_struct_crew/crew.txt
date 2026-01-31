@@ -1,0 +1,122 @@
+i want to build mutiagent LLM system to generate
+
+i have following crewai crew for solving this task. please complete agents and tasks defenitions in yaml with needed prompts to solve task. agents should work on Russian language.
+result should be given pydantic model.
+
+from enum import Enum
+from typing import List, Optional
+
+from crewai import Agent, Crew, Process, Task
+from crewai.agents.agent_builder.base_agent import BaseAgent
+from crewai.project import CrewBase, agent, crew, task
+from pydantic import BaseModel, Field
+
+from autogen.cai_tools import settings
+
+
+class GBPMNElementType(str, Enum):
+    TASK = "task"
+    GATEWAY = "gateway"
+    EVENT = "event"
+    DATA = "data"
+
+
+class GBPMNElement(BaseModel):
+    """ Diagram element """
+    id: str = Field(description="Unique identifier")
+    name: str = Field(description="Name of element")
+    type: GBPMNElementType = Field(description="type of BPMN process element")
+    subtype: Optional[str] = Field(description="Subtype of element, meaning variations of events and gateways")
+    actor_id: str = Field(description="Actor identifier referencing GBPMNActor")
+
+
+class GBPMNFlow(BaseModel):
+    """ Link between diagram elements """
+    name: str
+    source_id: str = Field(description="Unique identifier of link source element referencing GBPMNElement")
+    target_id: str = Field(description="Unique identifier of link destination element referencing GBPMNElement")
+    type: Optional[str] = Field(description='"sequence" flow or "message" flow')
+
+
+class GBPMNProcess(BaseModel):
+    """ Process """
+    name: str
+    elements: List[GBPMNElement]
+    sequence_flows: List[GBPMNFlow]
+
+
+class GBPMNActor(BaseModel):
+    """ Process actor """
+    name: str
+
+
+class GBPMNDiagram(BaseModel):
+    """ BPMN diagram """
+    name: str
+    processes: List[GBPMNProcess]
+    message_flows: List[GBPMNFlow]
+    actors: List[GBPMNActor]
+
+
+@CrewBase
+class DirectionCrew:
+    agents: List[BaseAgent]
+    tasks: List[Task]
+
+    @agent
+    def top_analyst(self) -> Agent:
+        return Agent(
+            config=self.agents_config['top_analyst'],
+            allow_delegation=True,
+            llm=settings.llm
+        )
+
+    @agent
+    def business_analyst(self) -> Agent:
+        return Agent(
+            config=self.agents_config['business_analyst'],
+            allow_delegation=False,
+            llm=settings.llm
+        )
+
+    @agent
+    def bpmn_specialist(self) -> Agent:
+        return Agent(
+            config=self.agents_config['bpmn_specialist'],
+            allow_delegation=False,
+            llm=settings.llm
+        )
+
+    @agent
+    def validator(self) -> Agent:
+        return Agent(
+            config=self.agents_config['validator'],
+            allow_delegation=False,
+            llm=settings.llm
+        )
+
+    """"""
+
+    @task
+    def generate_bpmn(self) -> Task:
+        return Task(
+            config=self.tasks_config['generate_bpmn'],
+            agent=self.top_analyst(),
+            output_pydantic=GBPMNDiagram
+        )
+
+    @crew
+    def crew(self) -> Crew:
+        return Crew(
+            agents=self.agents,
+            tasks=self.tasks,
+            process=Process.hierarchical,
+            verbose=False
+        )
+
+
+def kickoff(crew):
+    return kickoff(
+        crew,
+        dict()
+    ) or None

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Hello World</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/bpmn-js@18.10.1/dist/assets/bpmn-js.css"/>
+    <script src="https://unpkg.com/bpmn-js@18.10.1/dist/bpmn-viewer.development.js"></script>
+
+    <style>
+        html, body, #canvas {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="canvas"></div>
+<script>
+    var bpmnModeler = new BpmnJS({
+        container: '#canvas',
+    });
+
+    async function openDiagram(bpmnXML) {
+        try {
+            await bpmnModeler.importXML(bpmnXML);
+            window.xcanvas = bpmnModeler.get('canvas');
+            window.xcanvas.zoom('fit-viewport');
+        } catch (err) {
+        }
+    }
+
+    window.plot = (xml) => {
+        openDiagram(xml).then()
+    }
+</script>
+</body>
+</html>
