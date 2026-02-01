@@ -73,10 +73,10 @@ class BPMNParser:
         if bounds_element is None:
             return None
 
-        x = float(bounds_element.get('x', 0))
-        y = float(bounds_element.get('y', 0))
-        width = float(bounds_element.get('width', 0))
-        height = float(bounds_element.get('height', 0))
+        x = int(float(bounds_element.get('x', 0)))
+        y = int(float(bounds_element.get('y', 0)))
+        width = int(float(bounds_element.get('width', 0)))
+        height = int(float(bounds_element.get('height', 0)))
 
         return (x, y, width, height)
 
@@ -85,13 +85,10 @@ class BPMNParser:
         """Parse waypoints from edge element"""
         waypoints = edge_element.findall(f'.//{cls.DI_NS}waypoint')
         if len(waypoints) >= 2:
-            first = waypoints[0]
-            last = waypoints[-1]
-            x0 = float(first.get('x', 0))
-            y0 = float(first.get('y', 0))
-            x1 = float(last.get('x', 0))
-            y1 = float(last.get('y', 0))
-            return (x0, y0, x1, y1)
+            return [
+                (int(float(i.get('x', 0))), int(float(i.get('y', 0))))
+                for i in waypoints
+            ]
         return None
 
     @classmethod
@@ -162,7 +159,7 @@ class BPMNParser:
                 type=flow_type,
                 name=flow_elem.get('name'),
                 expression=cls._parse_expression(flow_elem),
-                line=edges_map.get(flow_id)
+                lines=edges_map.get(flow_id)
             )
             flows.append(flow)
 
@@ -246,7 +243,7 @@ class BPMNParser:
                 target_ref=msg_flow.get('targetRef', ''),
                 type='message',
                 name=msg_flow.get('name'),
-                line=edges_map.get(flow_id)
+                lines=edges_map.get(flow_id)
             )
             interprocess_flows.append(flow)
 

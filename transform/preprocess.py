@@ -8,7 +8,7 @@ from tqdm import tqdm
 from transform.bpmn_parser import BPMNParser
 from transform.utils import xhash
 
-DRY = True
+DRY = False
 
 filterlist = {}
 
@@ -28,10 +28,7 @@ def load_input():
         uid = xhash(txt)
         if uid in filterlist: continue
 
-        # if 'v3' in loc:
-        #     print(uid)
-
-        out_all = f"out_notation/{fname}"
+        out_all = f"out_notation/{uid}.0.bpmn"
         if not DRY:
             if os.path.isfile(out_all): continue
             with open(out_all, "w") as f:

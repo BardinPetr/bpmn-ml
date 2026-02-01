@@ -35,17 +35,27 @@ class BPMNFlow:
     type: Optional[str] = None  # "sequence" flow / "message" flow
     name: Optional[str] = None  # human readable name for that link
     expression: Optional[str] = None  # human readable note / conditional expression for that link
-    line: Optional[Tuple[float, float, float, float]] = None  # (x0,y0,x1,y1)
+    lines: List[Optional[Tuple[int, int]]] = field(default_factory=list)
 
+
+@dataclass_json
+@dataclass
+class BPMNLane:
+    id: str
+    name: str
+    bbox: Optional[Tuple[float, float, float, float]] = None  # x, y, w, h
+    flow_refs: List[str] = field(default_factory=list)
 
 @dataclass_json
 @dataclass
 class BPMNProcess:
     id: str
     name: str
-    participant_name: Optional[str] = None  # from colaboration info
+    participant_name: Optional[str] = None
     elements: List[BPMNElement] = field(default_factory=list)
-    flows: List[BPMNmeFlow] = field(default_factory=list)
+    flows: List[BPMNFlow] = field(default_factory=list)
+    lanes: List[BPMNLane] = field(default_factory=list)
+    bbox: Optional[Tuple[float, float, float, float]] = None  # x, y, w, h
 
 
 @dataclass_json
@@ -57,6 +67,16 @@ class BPMNDiagram:
     def save(self, path: str):
         with open(path, "w") as f:
             f.write(self.to_json())
+
+    @property
+    def links(self):
+        return [
+            l2
+            for p in self.processes
+            for f in p.flows
+            if f.lines
+            for l2 in zip(f.lines[:-1], f.lines[1:])
+        ]
 
 
 def bpmd_classes_from_json(jsontext: str) -> BPMNDiagram:

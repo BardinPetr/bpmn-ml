@@ -27,14 +27,11 @@ def scale(diag: BPMNDiagram, sx, sy, sz) -> BPMNDiagram:
                 w * sz, h * sz,
             )
         for j in i.flows:
-            if not j.line: continue
-            x, y, x1, y1 = j.line
-            j.line = (
-                (x - sx) * sz,
-                (y - sy) * sz,
-                (x1 - sx) * sz,
-                (y1 - sy) * sz,
-            )
+            if not j.lines: continue
+            j.lines = [
+                ((kx - sx) * sz, (ky - sy) * sz)
+                for kx, ky in j.lines
+            ]
     return diag
 
 
@@ -49,6 +46,9 @@ def run(pw: Playwright, data):
 
     for fname in tqdm(data):
         txt = open(fname).read()
+        models = parse_bpmn(txt)
+
+        if len(models.links) < 2: continue
 
         output_f = b2img(fname)
         if os.path.isfile(output_f): continue
@@ -58,7 +58,6 @@ def run(pw: Playwright, data):
         page.locator("#canvas").screenshot(path=output_f, type='jpeg')
         pg = page.evaluate("() => window.xcanvas._cachedViewbox")
 
-        models = parse_bpmn(txt)
         models = scale(models, pg['x'], pg['y'], pg['scale'])
         models.save(b2lab(fname))
 

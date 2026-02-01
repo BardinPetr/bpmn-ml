@@ -31,7 +31,7 @@ def draw_rect_with_text(
         text="test",
         rect_color=(0, 255, 0),
         text_color=(255, 0, 255),
-        thickness=2,
+        thickness=1,
 ):
     # Draw rectangle (top-left to bottom-right corners)
     pt1 = (x, y)
@@ -39,9 +39,9 @@ def draw_rect_with_text(
     cv2.rectangle(img, pt1, pt2, rect_color, thickness)
 
     # Get text size for centering
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 0.7
-    font_thickness = 2
+    font = cv2.FONT_HERSHEY_COMPLEX
+    font_scale = 0.4
+    font_thickness = 1
     text_size = cv2.getTextSize(text, font, font_scale, font_thickness)[0]
 
     # Center text position
@@ -64,59 +64,60 @@ def read_item(fp):
 
     return img, j_parser.bbox_list, j_parser.type_list
 
-
 import os
 import cv2
 
-dataset = ""
 
-root = ""
-dataset_path = os.path.join(root, "out_label")
+if __name__ == "__main__":
+    dataset = ""
 
-from tqdm import tqdm
+    root = ""
+    dataset_path = os.path.join(root, "out_label")
 
-full_type_list = list()
-embeddings = list()
-name_list = list()
+    from tqdm import tqdm
 
-st = 600
-ordfiles = sorted(os.listdir(dataset_path))
-t = tqdm(total=len(ordfiles))
-t.update(st)
+    full_type_list = list()
+    embeddings = list()
+    name_list = list()
 
-while st < len(ordfiles):
-    name = ordfiles[st]
-    tmp, bbox_list, type_list = read_item(dataset_path + "/" + name)
+    st = 600
+    ordfiles = sorted(os.listdir(dataset_path))
+    t = tqdm(total=len(ordfiles))
+    t.update(st)
 
-    for bbox, type in zip(bbox_list, type_list):
-        x, y, width, height = [int(i) for i in bbox]
-        sub_img = tmp[y: y + height, x: x + width]
+    while st < len(ordfiles):
+        name = ordfiles[st]
+        tmp, bbox_list, type_list = read_item(dataset_path + "/" + name)
 
-    for bbox, type in zip(bbox_list, type_list):
-        x, y, width, height = [int(i) for i in bbox]
-        draw_rect_with_text(tmp, x, y, width, height, type)
+        for bbox, type in zip(bbox_list, type_list):
+            x, y, width, height = [int(i) for i in bbox]
+            sub_img = tmp[y: y + height, x: x + width]
 
-    cv2.imshow("res", tmp)
-    k = cv2.waitKey(150)
-    if k == ord("q"):
-        break
-    elif k == ord("a"):
-        st += 1
-        t.update()
-    elif k == ord("r"):
-        st -= 1
-        continue
-    elif k == ord("d"):
-        st += 1
-        t.update()
-        with open("del.list", "a") as fa:
-            fa.write(name + "\n")
-    else:
-        st += 1
-        t.update()
+        for bbox, type in zip(bbox_list, type_list):
+            x, y, width, height = [int(i) for i in bbox]
+            draw_rect_with_text(tmp, x, y, width, height, type)
 
-full_type_list = np.array(full_type_list)
-embeddings = np.array(embeddings)
-name_list = np.array(name_list)
+        cv2.imshow("res", tmp)
+        k = cv2.waitKey(0)
+        if k == ord("q"):
+            break
+        elif k == ord("a"):
+            st += 1
+            t.update()
+        elif k == ord("r"):
+            st -= 1
+            continue
+        elif k == ord("d"):
+            st += 1
+            t.update()
+            with open("del.list", "a") as fa:
+                fa.write(name + "\n")
+        else:
+            st += 1
+            t.update()
 
-cv2.destroyAllWindows()
+    full_type_list = np.array(full_type_list)
+    embeddings = np.array(embeddings)
+    name_list = np.array(name_list)
+
+    cv2.destroyAllWindows()
