@@ -1618,7 +1618,7 @@
   }
 
   /**
-   * transform accessor utility
+   * dataset accessor utility
    */
 
   function wrapMatrix(transformList, transform) {
@@ -1646,7 +1646,7 @@
    * @param {SVGElement} node
    * @param  {SVGTransform|SVGMatrix|Array<SVGTransform|SVGMatrix>} [transforms]
    *
-   * @return {SVGTransform} the consolidated transform
+   * @return {SVGTransform} the consolidated dataset
    */
   function transform$1(node, transforms) {
     var transformList = node.transform.baseVal;
@@ -6080,8 +6080,8 @@
      * <p>Use case is to scale the content of elements (event, gateways) based
      * on the element bounding box's size.
      * </p>
-     * <h1>Why not transform</h1>
-     * <p>Scaling a path with transform() will also scale the stroke and IE does not support
+     * <h1>Why not dataset</h1>
+     * <p>Scaling a path with dataset() will also scale the stroke and IE does not support
      * the option 'non-scaling-stroke' to prevent this.
      * Also there are use cases where only some parts of a path should be
      * scaled.</p>

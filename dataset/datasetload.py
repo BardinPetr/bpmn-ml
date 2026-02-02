@@ -1,7 +1,7 @@
 import os
 import re
 
-from transform.bpmn_models import BPMNDiagram
+from dataset.bpmn_models import BPMNDiagram
 from utils import pmap
 
 
@@ -25,7 +25,7 @@ def load(x):
         hash=label_file.split('.')[0],
         diagram=diag,
         textdetect=load_text_ds(diag),
-        image=os.path.join(idr, label_file.split('.')[0] + '.jpg'),
+        image=os.path.join(idr, label_file.replace(".json", ".jpg")),
     )
 
 

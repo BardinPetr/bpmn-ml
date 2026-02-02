@@ -17,21 +17,34 @@ from transform.preprocess import load_bpmn_all, b2img, b2lab
 size = (1080, 1920)
 
 def scale(diag: BPMNDiagram, sx, sy, sz) -> BPMNDiagram:
+    def __bbox(o):
+        x, y, w, h = o
+        return (
+            (x - sx) * sz,
+            (y - sy) * sz,
+            w * sz, h * sz,
+        )
     for i in diag.processes:
         for j in i.elements:
             if not j.bbox: continue
-            x, y, w, h = j.bbox
-            j.bbox = (
-                (x - sx) * sz,
-                (y - sy) * sz,
-                w * sz, h * sz,
-            )
+            j.bbox = __bbox(j.bbox)
         for j in i.flows:
             if not j.lines: continue
             j.lines = [
                 ((kx - sx) * sz, (ky - sy) * sz)
                 for kx, ky in j.lines
             ]
+        for j in i.lanes:
+            if not j.bbox: continue
+            j.bbox = __bbox(j.bbox)
+        if i.bbox:
+            i.bbox = __bbox(i.bbox)
+    for j in diag.interprocess_flows:
+        if not j.lines: continue
+        j.lines = [
+            ((kx - sx) * sz, (ky - sy) * sz)
+            for kx, ky in j.lines
+        ]
     return diag
 
 

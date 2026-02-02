@@ -16,7 +16,7 @@ class GBPMNElement(BaseModel):
     id: str = Field(description="Unique identifier")
     name: str = Field(description="Name of element")
     type: GBPMNElementType = Field(description="type of BPMN process element")
-    subtype: Optional[str] = Field(description="Subtype of element, meaning variations of events and gateways")
+    subtype: Optional[str] = Field(default=None, description="Subtype of element, meaning variations of events and gateways")
     actor_id: str = Field(description="Actor identifier referencing GBPMNActor")
 
 
@@ -25,14 +25,14 @@ class GBPMNFlow(BaseModel):
     name: str
     source_id: str = Field(description="Unique identifier of link source element referencing GBPMNElement")
     target_id: str = Field(description="Unique identifier of link destination element referencing GBPMNElement")
-    type: Optional[str] = Field(description='"sequence" flow or "message" flow')
+    type: str = Field(description='"sequence" flow or "message" flow')
 
 
 class GBPMNProcess(BaseModel):
     """ Process """
     name: str
-    elements: List[GBPMNElement]
-    sequence_flows: List[GBPMNFlow]
+    elements: List[GBPMNElement] = Field(default_factory=list)
+    sequence_flows: List[GBPMNFlow] = Field(default_factory=list)
 
 
 class GBPMNActor(BaseModel):
@@ -43,6 +43,6 @@ class GBPMNActor(BaseModel):
 class GBPMNDiagram(BaseModel):
     """ BPMN diagram """
     name: str
-    processes: List[GBPMNProcess]
-    message_flows: List[GBPMNFlow]
-    actors: List[GBPMNActor]
+    processes: List[GBPMNProcess] = Field(default_factory=list)
+    message_flows: List[GBPMNFlow] = Field(default_factory=list)
+    actors: List[GBPMNActor] = Field(default_factory=list)

@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 from typing import Optional
 
-from bpmn_models import BPMNFlow, BPMNDiagram, BPMNElement, BPMNProcess
+from bpmn_models import BPMNFlow, BPMNDiagram, BPMNElement, BPMNProcess, BPMNLane
 
 
 class BPMNParser:
@@ -90,6 +90,37 @@ class BPMNParser:
                 for i in waypoints
             ]
         return None
+
+    @classmethod
+    def _parse_lanes(cls, process_element, shapes_map):
+        """Parse lanes within a process"""
+        lanes = []
+
+        lane_set = process_element.find(f'{cls.BPMN_NS}laneSet')
+        if lane_set is None:
+            return lanes
+
+        for lane_elem in lane_set.findall(f'{cls.BPMN_NS}lane'):
+            lane_id = lane_elem.get('id', '')
+            if not lane_id:
+                continue
+
+            # Parse flowNodeRef elements
+            flow_refs = [
+                ref.text.strip()
+                for ref in lane_elem.findall(f'{cls.BPMN_NS}flowNodeRef')
+                if ref.text and ref.text.strip()
+            ]
+
+            lane = BPMNLane(
+                id=lane_id,
+                name=lane_elem.get('name', ''),
+                bbox=shapes_map.get(lane_id),
+                flow_refs=flow_refs
+            )
+            lanes.append(lane)
+
+        return lanes
 
     @classmethod
     def _parse_expression(cls, flow_element):
@@ -218,10 +249,11 @@ class BPMNParser:
         """Parse collaboration diagram with participants and message flows"""
         collaboration = root.find(f'{cls.BPMN_NS}collaboration')
         if collaboration is None:
-            return {}, []
+            return {}, {}, []
 
         # Parse participants (lanes/pools)
         participants = {}
+        participant_bboxes = {}
         for participant in collaboration.findall(f'{cls.BPMN_NS}participant'):
             participant_id = participant.get('id', '')
             process_ref = participant.get('processRef', '')
@@ -229,6 +261,7 @@ class BPMNParser:
 
             if participant_id and process_ref:
                 participants[process_ref] = name
+                participant_bboxes[process_ref] = shapes_map.get(participant_id)
 
         # Parse message flows (inter-process flows)
         interprocess_flows = []
@@ -247,7 +280,7 @@ class BPMNParser:
             )
             interprocess_flows.append(flow)
 
-        return participants, interprocess_flows
+        return participants, participant_bboxes, interprocess_flows
 
     @classmethod
     def load_xml(cls, xml_text: str):
@@ -277,7 +310,7 @@ class BPMNParser:
             shapes_map, edges_map = cls._parse_diagram_info(root)
 
             # Parse collaboration if exists
-            participants, interprocess_flows = cls._parse_collaboration(
+            participants, participant_bboxes, interprocess_flows = cls._parse_collaboration(
                 root, shapes_map, edges_map
             )
 
@@ -297,6 +330,9 @@ class BPMNParser:
                 # Parse sequence flows
                 flows = cls._parse_flows(process_elem, edges_map, 'sequence')
 
+                # Parse lanes
+                lanes = cls._parse_lanes(process_elem, shapes_map)
+
                 # Link elements with flows
                 cls._link_elements_and_flows(elements, flows)
 
@@ -306,11 +342,12 @@ class BPMNParser:
                     name=process_elem.get('name', f'Process_{process_id}'),
                     participant_name=participant_name,
                     elements=elements,
-                    flows=flows
+                    flows=flows,
+                    lanes=lanes,
+                    bbox=participant_bboxes.get(process_id)
                 )
 
                 processes.append(process)
-
             # If no processes found, check for single process in root
             if not processes:
                 # Try to find process directly
@@ -319,13 +356,16 @@ class BPMNParser:
                     process_id = process_elem.get('id', '')
                     elements = cls._parse_process_elements(process_elem, shapes_map)
                     flows = cls._parse_flows(process_elem, edges_map, 'sequence')
+                    lanes = cls._parse_lanes(process_elem, shapes_map)
                     cls._link_elements_and_flows(elements, flows)
 
                     process = BPMNProcess(
                         id=process_id,
                         name=process_elem.get('name', f'Process_{process_id}'),
                         elements=elements,
-                        flows=flows
+                        flows=flows,
+                        lanes=lanes,
+                        bbox=participant_bboxes.get(process_id)
                     )
                     processes.append(process)
 
@@ -345,3 +385,9 @@ class BPMNParser:
 def parse_bpmn(xml_text: str) -> Optional[BPMNDiagram]:
     r = BPMNParser.parse_bpmn(xml_text)
     return r
+
+
+if __name__ == '__main__':
+    from rich import print
+    print(parse_bpmn(open(
+        "/dataset/out_notation/6c687fa68107d786a7e386a7e11f32a2789457f7d5a82e0fdacdfb32f432bf27.0.bpmn").read()))
