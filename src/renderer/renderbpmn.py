@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import pathlib
 import time
 from time import sleep
 from typing import Optional
@@ -12,7 +13,7 @@ SIZE = (1920, 1080)
 
 
 class BPMNRenderer:
-    def __init__(self, headless = True):
+    def __init__(self, headless=True):
         self.headless = headless
         self.__pw: Optional[Playwright] = None
         self.__page: Optional[Page] = None
@@ -25,8 +26,9 @@ class BPMNRenderer:
         self.__browser = await self.__target.launch(headless=self.headless)
         self.__context = await self.__browser.new_context(viewport=dict(width=SIZE[0], height=SIZE[1]))
         self.__page = await self.__context.new_page()
-        basepath = os.path.join(os.getcwd(), "bundling", "public", "index.html")
-        await self.__page.goto(f"file://{basepath}")
+        base_path = pathlib.Path(__file__).parent.resolve()
+        html_path = os.path.join(base_path, "bundling", "public", "index.html")
+        await self.__page.goto(f"file://{html_path}")
         logger.info("Playwright ready!")
 
     async def __export_result(self, timeout=0.3):
@@ -64,6 +66,15 @@ class BPMNRenderer:
         return res
 
 
+def save_all(res):
+    with open("test.xml", "w") as f:
+        f.write(res['xml'])
+    with open("test.svg", "w") as f:
+        f.write(res['svg'])
+    with open("test.png", "wb") as f:
+        f.write(res['png'])
+
+
 if __name__ == "__main__":
     async def main():
         x = BPMNRenderer()
@@ -85,5 +96,6 @@ if __name__ == "__main__":
             f.write(res['svg'])
         with open("test.png", "wb") as f:
             f.write(res['png'])
+
 
     asyncio.run(main())
