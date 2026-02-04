@@ -31,7 +31,7 @@ def convert(dets) -> DetectorOutput:
     return result
 
 
-@serve.deployment(ray_actor_options={"num_cpus": 1})
+@serve.deployment(ray_actor_options={"num_cpus": 0.5})
 class ObjectLineDetector:
     def __init__(self):
         model_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "shapes_edges_v1.onnx")

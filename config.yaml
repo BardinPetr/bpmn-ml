@@ -39,6 +39,9 @@ applications:
       - name: DiagramAnalyzer
         num_replicas: 1
         max_ongoing_requests: 1
-      - name: ObjectLineDetector
+#      - name: ObjectLineDetector
+#        num_replicas: 1
+#        max_ongoing_requests: 1
+      - name: OCRProcess
         num_replicas: 1
         max_ongoing_requests: 1
