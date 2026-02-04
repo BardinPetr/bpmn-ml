@@ -1,0 +1,44 @@
+proxy_location: EveryNode
+
+http_options:
+  host: 0.0.0.0
+  port: 8000
+
+grpc_options:
+  port: 9000
+  grpc_servicer_functions: [ ]
+
+logging_config:
+  encoding: TEXT
+  log_level: INFO
+  logs_dir: null
+  enable_access_log: true
+  additional_log_standard_attrs: [ ]
+
+applications:
+#  - name: ingress
+#    route_prefix: /
+#    import_path: src.ingress.api.main:app
+#    runtime_env: { }
+#    deployments:
+#      - name: APIIngress
+#        num_replicas: 1
+#        max_ongoing_requests: 100
+#      - name: TaskManager
+#        num_replicas: 1
+#        max_ongoing_requests: 100
+
+  - name: analyzer
+    route_prefix: /analyzer
+    import_path: src.diagram.main:app
+    runtime_env: { }
+    deployments:
+#      - name: DiagramAnalyzerTask
+#        num_replicas: 5
+#        max_ongoing_requests: 2
+      - name: DiagramAnalyzer
+        num_replicas: 1
+        max_ongoing_requests: 1
+      - name: ObjectLineDetector
+        num_replicas: 1
+        max_ongoing_requests: 1

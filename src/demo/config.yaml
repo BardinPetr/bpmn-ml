@@ -1,0 +1,50 @@
+proxy_location: EveryNode
+
+http_options:
+  host: 0.0.0.0
+  port: 8000
+
+grpc_options:
+  port: 9000
+  grpc_servicer_functions: [ ]
+
+logging_config:
+  encoding: TEXT
+  log_level: INFO
+  logs_dir: null
+  enable_access_log: true
+  additional_log_standard_attrs: [ ]
+
+applications:
+  - name: app1
+    route_prefix: /app1
+    import_path: a:app
+    runtime_env: { }
+    deployments:
+      - name: Srv1
+        num_replicas: 3
+        max_ongoing_requests: 100
+      - name: Srv2
+        num_replicas: 6
+        max_ongoing_requests: 100
+      - name: Srv3
+        num_replicas: 3
+        max_ongoing_requests: 100
+
+  - name: app2
+    #  route_prefix: /app2
+    route_prefix: /target
+    import_path: b:app
+    runtime_env: { }
+    deployments:
+      - name: Main
+        num_replicas: 3
+        max_ongoing_requests: 100
+
+  - name: app3
+    import_path: c:app
+    runtime_env: { }
+    deployments:
+      - name: Processor
+        num_replicas: 1
+        max_ongoing_requests: 100

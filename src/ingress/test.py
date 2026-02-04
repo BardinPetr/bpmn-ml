@@ -1,4 +1,5 @@
 import asyncio
+import random
 import re
 import time
 from pathlib import Path
@@ -30,14 +31,14 @@ async def process(subsystem, tasks: List) -> StatusRs:
         while True:
             rs = await client.get(f"{base_url}/status/{request_id}")
             status: StatusRs = StatusRs.model_validate(rs.json())
-            print(status)
             if status.status in [TaskStatus.SUCCESS, TaskStatus.FAILURE]:
                 break
             await asyncio.sleep(0.5)
 
         async def __load(x):
             res = await client.get(f"{base_url}/result/{request_id}/{x}")
-            fn = re.findall(r'filename="(.*)"', res.headers['content-disposition'])[0]
+            # fn = re.findall(r'filename="(.*)"', res.headers['content-disposition'])[0]
+            fn = random.random()
             with open(f"./tmp/{x}_{fn}", "wb") as f:
                 f.write(res.read())
 
@@ -51,7 +52,7 @@ async def process(subsystem, tasks: List) -> StatusRs:
 async def main():
     result = await process("d2t", [
         "/home/petr/projects/mltests/workspace/demos/p1.png"
-    ] * 10)
+    ] * 20)
     print(result)
 
     # result = await client.process("t2d", [TaskDataT2D(text="Generate diagram", props={})])

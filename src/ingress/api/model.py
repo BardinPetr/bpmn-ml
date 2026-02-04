@@ -56,7 +56,7 @@ class TaskResult(BaseModel):
     task_id: str = ""
     status: TaskStatus = TaskStatus.PENDING
     result: Optional[Any] = None
-    output_file_ids: List[str]
+    output_file_ids: List[str] = Field(default_factory=list)
     error: Optional[str] = None
     spent_ms: Optional[int] = None
     files: Optional[List[FileData]] = None

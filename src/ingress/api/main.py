@@ -9,10 +9,16 @@ from src.ingress.task.task_manager import app as task_manager_app
 from src.ingress.api.model import TaskStatus, SubmitRs, StatusRs, InternalTaskBlock, SubsystemType, TaskDataT2D, \
     FileData, \
     TaskDataD2T
-from src.ingress.task.task_manager import TaskManager
+from fastapi.middleware.cors import CORSMiddleware
 
 fastapi_app = FastAPI()
-
+fastapi_app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @serve.deployment(ray_actor_options={"num_cpus": 0.1})
 @serve.ingress(fastapi_app)

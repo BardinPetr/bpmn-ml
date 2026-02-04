@@ -18,3 +18,10 @@ transform/out_*/
 .env
 
 .idea/
+
+node_modules/
+
+dataset/input/
+dataset/out_*/
+
+tmp/
