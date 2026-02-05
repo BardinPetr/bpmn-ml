@@ -1,5 +1,11 @@
 services:
   redis:
     image: redis
+    command: --port 16379
     ports:
-      - "16379:6379"
+      - "16379:16379"
+  app:
+    image: ml-bpmn-analyzer:latest
+    build: .
+    ports:
+      - "8000:8000"
