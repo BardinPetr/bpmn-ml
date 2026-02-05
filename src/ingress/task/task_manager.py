@@ -53,8 +53,10 @@ class TaskManager:
             if i.status != TaskStatus.SUCCESS: continue
             tr = DiagramAnalyzeTaskRs(**i.result).as_task_result()
             tr.task_id = i.id
-            tr.output_image_ids = [f"{i.id}+{fi}" for fi, f in enumerate(tr.files) if 'image' in f.content_type]
+            tr.output_image_ids = [f"{i.id}+{fi}" for fi, f in enumerate(tr.files) if 'png' in f.content_type]
             tr.output_file_ids = [f"{i.id}+{fi}" for fi in range(len(tr.files))]
+            tr.output_image_names = [i.filename for i in tr.files if 'png' in i.content_type]
+            tr.output_file_names = [i.filename for i in tr.files]
             tr.files = None
             res.append(tr)
 

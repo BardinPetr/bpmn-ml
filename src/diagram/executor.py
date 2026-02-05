@@ -1,4 +1,6 @@
 import asyncio
+import pickle
+import time
 
 import cv2
 from ray import serve
@@ -38,6 +40,13 @@ class DiagramAnalyzer:
     async def __call__(self, img, do_visualize=False, lang=None) -> DiagramAnalyzeTaskRs:
         print(f"start analyze conf {do_visualize} {lang}")
         res = DiagramAnalyzeTaskRs()
+        ts = time.time()
+
+        # res.files.append(FileData(
+        #     data=img, todo
+        #     content_type="image/png",
+        #     filename="original.png",
+        # ))
 
         detector_out, ocr = await asyncio.gather(
             self.struct_detector.remote(img),
@@ -61,6 +70,8 @@ class DiagramAnalyzer:
         ))
         with open("c.json", "w") as f:
             f.write(diagram.model_dump_json())
+        with open("c.pkl", "wb") as f:
+            pickle.dump(diagram, f)
 
         graph_builder = GraphBuilder(contents, diagram)
         graph = graph_builder()
@@ -97,6 +108,7 @@ class DiagramAnalyzer:
                 filename="diagram.bpmn",
             ))
 
+        res.info['time_ms'] = int((time.time() - ts) * 1000)
         res.success = True
         return res
 

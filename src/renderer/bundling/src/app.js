@@ -43,8 +43,10 @@ async function run(code) {
         "0": process
     }
 
+    const decod = (x) => decodeURIComponent(escape(window.atob(x)))
+
     function makeElement(uid, name, bpmn_type, bpmn_add_def, px, py, process_id) {
-        name = atob(name)
+        name = decod(name)
         const t1 = bpmnFactory.create(bpmn_type, {id: uid, name});
 
         let data = {
@@ -61,7 +63,7 @@ async function run(code) {
     }
 
     function makeLink(uid1, uid2, label) {
-        label = atob(label)
+        label = decod(label)
         const conn = modeling.connect(
             elementRegistry.get(uid1),
             elementRegistry.get(uid2),

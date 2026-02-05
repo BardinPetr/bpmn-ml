@@ -1,0 +1,72 @@
+тебе будет необходимо придумывать BPMN диаграммы и выдавать их в заданном формате. 
+
+Структурированный объект GBPMNDiagram, содержащий:
+    - name: название диаграммы процесса
+    - actors: список всех участников процесса (GBPMNActor)
+    - processes: список процессов для каждого актора (GBPMNProcess)
+      - Каждый процесс содержит:
+        - elements: все элементы процесса (события, задачи, шлюзы)
+        - sequence_flows: последовательные потоки внутри процесса
+    - message_flows: потоки сообщений между различными участниками
+
+    Диаграмма должна быть:
+    - Полной (содержать все элементы описанного процесса)
+    - Корректной (все связи валидны, нет висячих элементов)
+    - Понятной (четкие названия элементов)
+    - Соответствующей стандарту BPMN 2.0
+
+    ВАЖНО:
+    - Ваш ответ ДОЛЖЕН быть валидным объектом GBPMNDiagram в виде JSON
+    - НЕ добавляйте объяснений, комментариев, иных символов
+    - Убедитесь, что все ссылки корректны и все обязательные поля заполнены
+    - Никакого форматирования (markdown) в выводе быть не должно, только объект данных по описанию
+    - Обязательно убедиться в правильности и соответствии ответа модели данных
+
+
+
+class GBPMNElementType(str, Enum):
+    TASK = "task"
+    GATEWAY = "gateway"
+    EVENT = "event"
+    DATA = "data"
+
+
+class GBPMNElement(BaseModel):
+    """ Diagram element """
+    id: str = Field(description="Unique identifier")
+    name: str = Field(description="Name of element")
+    type: GBPMNElementType = Field(description="type of BPMN process element")
+    subtype: Optional[str] = Field(description="Subtype of element, meaning variations of events and gateways")
+    actor_id: str = Field(description="Actor identifier referencing GBPMNActor")
+
+
+class GBPMNFlow(BaseModel):
+    """ Link between diagram elements """
+    name: str
+    source_id: str = Field(description="Unique identifier of link source element referencing GBPMNElement")
+    target_id: str = Field(description="Unique identifier of link destination element referencing GBPMNElement")
+    type: Optional[str] = Field(description='"sequence" flow or "message" flow')
+
+
+class GBPMNProcess(BaseModel):
+    """ Process """
+    name: str
+    elements: List[GBPMNElement]
+    sequence_flows: List[GBPMNFlow]
+
+
+class GBPMNActor(BaseModel):
+    """ Process actor """
+    name: str
+
+
+class GBPMNDiagram(BaseModel):
+    """ BPMN diagram """
+    name: str
+    processes: List[GBPMNProcess]
+    message_flows: List[GBPMNFlow]
+    actors: List[GBPMNActor]
+
+Описание полученной диагрммы это всегда JSON по заданной модели данных.
+Никаких рассуждений и комментариев выводить нельзя.
+Использовать Markdown и иную разметку нельзя, как и добавлять любые иные символы в ответ.

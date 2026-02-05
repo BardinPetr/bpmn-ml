@@ -1,4 +1,7 @@
 import math
+from typing import List
+
+from src.diagram.description_models import GBPMNElementType, GBPMNElement, GBPMNFlow
 
 
 def iou_metrics(inner, outer):
@@ -57,3 +60,46 @@ def dist_pt2line(point, line):
 
 def dist_pt2bbox(point, bbox):
     return min(dist_pt2line(point, i) for i in bbox_lines(bbox))
+
+
+EVENT_TYPE_SET = {
+    GBPMNElementType.EVENT_START,
+    GBPMNElementType.EVENT_END,
+    GBPMNElementType.EVENT_CATCH,
+    GBPMNElementType.EVENT_THROW,
+}
+
+GATEWAY_TYPE_SET = {GBPMNElementType.GATEWAY}
+
+
+def get_bbox_center(elements: List[GBPMNElement], type: GBPMNElementType = None):
+    coord_list = list()
+    idx_list = list()
+    for i, el in enumerate(elements):
+        if type is not None:
+            if el.type not in type:
+                continue
+        x1, y1, x2, y2 = el.bbox
+        center_x = (x1 + x2) / 2
+        center_y = (y1 + y2) / 2
+        coord_list.append(
+            [center_x, center_y]
+        )
+        idx_list.append(i)
+    return coord_list, idx_list
+
+
+def get_bboxlist_centers(bboxes: List):
+    coord_list = list()
+    for bbox in bboxes:
+        x1, y1, x2, y2 = bbox
+        center_x = (x1 + x2) / 2
+        center_y = (y1 + y2) / 2
+        coord_list.append(
+            [center_x, center_y]
+        )
+    return coord_list
+
+
+def get_links_coordinate(links: List[GBPMNFlow]):
+    return [link.line for link in links]

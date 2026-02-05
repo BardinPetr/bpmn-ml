@@ -19,7 +19,7 @@ def cfirst(x):
 
 
 def b64(x):
-    x = str(x)
+    x = str(x or "")
     return base64.b64encode(x.encode()).decode()
 
 

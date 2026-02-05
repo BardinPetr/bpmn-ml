@@ -18,6 +18,7 @@ import {
     Checkbox,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ReactMarkdown from 'react-markdown';
 
 const API_BASE = 'http://localhost:8000';
 
@@ -33,6 +34,8 @@ interface TaskResult {
     result?: any;
     output_file_ids: string[];
     output_image_ids: string[];
+    output_file_names: string[];
+    output_image_names: string[];
     error?: string;
     spent_ms?: number;
 }
@@ -109,8 +112,8 @@ const App: React.FC = () => {
     };
 
     return (
-        <Container maxWidth="md" sx={{my: 4}}>
-            <Typography variant="h4" gutterBottom>ML Image Analyzer</Typography>
+        <Container maxWidth={false} sx={{my: 4, height: '100vh'}}>
+            <Typography variant="h4" gutterBottom>BPMN Analyzer</Typography>
             <Paper sx={{p: 2, mb: 2}}>
                 <input type="file" multiple accept="image/*" onChange={handleFileChange}/>
                 <FormControl sx={{minWidth: 120, ml: 2}}>
@@ -145,12 +148,34 @@ const App: React.FC = () => {
                         </AccordionSummary>
                         <AccordionDetails>
                             {task.error && <Alert severity="error">{task.error}</Alert>}
-                            {task.result && <pre>{JSON.stringify(task.result, null, 2)}</pre>}
-                            {task.output_image_ids.map(id => (
-                                <img key={id} src={getImageSrc(id)} alt={id} style={{maxWidth: 300, display: 'block'}}/>
+                            {task.result && (
+                                <>
+                                    {task.result.description && (
+                                        <Paper sx={{p: 2, mb: 2}}>
+                                            <ReactMarkdown>{task.result.description}</ReactMarkdown>
+                                        </Paper>
+                                    )}
+                                    {task.result.time_ms !== undefined && (
+                                        <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+                                            Execution time: {task.result.time_ms} ms
+                                        </Typography>
+                                    )}
+                                </>
+                            )}
+                            {task.output_image_ids.map((id, imgIdx) => (
+                                <Accordion key={id}>
+                                    <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                                        <Typography>{task.output_image_names?.[imgIdx] || id}</Typography>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <img src={getImageSrc(id)} alt={id} style={{minWidth: '50%', maxWidth: '100%', display: 'block'}}/>
+                                    </AccordionDetails>
+                                </Accordion>
                             ))}
-                            {task.output_file_ids.map(id => (
-                                <Button key={id} onClick={() => download(id)}>Download {id}</Button>
+                            {task.output_file_ids.map((id, fileIdx) => (
+                                <Button key={id} onClick={() => download(id)}>
+                                    Download {task.output_file_names?.[fileIdx] || id}
+                                </Button>
                             ))}
                         </AccordionDetails>
                     </Accordion>

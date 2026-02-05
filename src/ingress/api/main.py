@@ -31,8 +31,6 @@ class APIIngress:
     async def submit_task_2t(self,
                              files: List[UploadFile],
                              parameters: str = Form(...)) -> SubmitRs:
-        print(parameters)
-        print(files)
         props = json.loads(parameters)
         async def __load(file: UploadFile):
             return TaskDataD2T(image=FileData(data=await file.read(), content_type=file.content_type),

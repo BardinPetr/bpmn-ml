@@ -2,7 +2,7 @@ import os
 import re
 
 from dataset.bpmn_models import BPMNDiagram
-from utils import pmap
+from src.utils import pmap
 
 
 def load_text_ds(diag: BPMNDiagram):
