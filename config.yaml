@@ -35,13 +35,13 @@ applications:
     deployments:
 #      - name: DiagramAnalyzerTask
 #        num_replicas: 5
-#        max_ongoing_requests: 2
+#        max_ongoing_requests: 1
       - name: DiagramAnalyzer
         num_replicas: 1
         max_ongoing_requests: 1
-#      - name: ObjectLineDetector
-#        num_replicas: 1
-#        max_ongoing_requests: 1
+      - name: ObjectLineDetector
+        num_replicas: 1
+        max_ongoing_requests: 1
       - name: OCRProcess
         num_replicas: 1
         max_ongoing_requests: 1

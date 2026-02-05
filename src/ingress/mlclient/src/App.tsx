@@ -124,7 +124,7 @@ const App: React.FC = () => {
                         <AccordionDetails>
                             {task.error && <Alert severity="error">{task.error}</Alert>}
                             {task.result && <pre>{JSON.stringify(task.result, null, 2)}</pre>}
-                            {task.output_file_ids.map(id => (
+                            {task.output_image_ids.map(id => (
                                 <img key={id} src={getImageSrc(id)} alt={id} style={{maxWidth: 300, display: 'block'}}/>
                             ))}
                             {task.output_file_ids.map(id => (

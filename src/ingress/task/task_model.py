@@ -1,19 +1,21 @@
 from dataclasses import dataclass, field
 from typing import List
 
-from src.ingress.api.model import TaskResult, FileData, TaskStatus, TaskDataT2D, TaskDataD2T
+from pydantic import BaseModel
+
+from src.ingress.api.model import TaskResult, FileData, TaskStatus
 
 
-class DiagramAnalyzeTaskRq:
-    image: str
+class DiagramAnalyzeTaskRq(BaseModel):
+    image: bytes
 
 
-@dataclass
-class DiagramAnalyzeTaskRs:
+class DiagramAnalyzeTaskRs(BaseModel):
     success: bool = False
     description: str = ""
     bpmn_xml: str = ""
     visualization: List[bytes] = field(default_factory=list)
+    files: List[FileData] = field(default_factory=list)
 
     def as_task_result(self) -> TaskResult:
         return TaskResult(
@@ -21,8 +23,8 @@ class DiagramAnalyzeTaskRs:
             result=dict(description=self.description),
             files=[
                 FileData(data=self.bpmn_xml.encode(), content_type="application/xml", filename="bpmn.xml"),
-                *(FileData(data=v, content_type="image/png", filename=f"out.{i}.png") for i, v in
-                  enumerate(self.visualization))
+                *[FileData(data=v, content_type="image/png", filename=f"out.{i}.png")
+                  for i, v in enumerate(self.visualization)]
             ]
         )
 
@@ -41,4 +43,3 @@ class DiagramGenerateTaskRs:
 
     def as_task_result(self) -> TaskResult:
         return TaskResult()
-

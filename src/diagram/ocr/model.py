@@ -1,15 +1,15 @@
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import List, Tuple
 
+from pydantic import BaseModel
 
-@dataclass
-class OCRText:
+
+class OCRText(BaseModel):
     text: str
-    bbox: Tuple[float, float, float, float]
+    bbox: Tuple[int, int, int, int]
     prob: float = 1.0
 
 
-@dataclass
-class OCRResult:
+class OCROutput(BaseModel):
     lang: str = ""
     texts: List[OCRText] = field(default_factory=list)

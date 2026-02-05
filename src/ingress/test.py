@@ -52,7 +52,7 @@ async def process(subsystem, tasks: List) -> StatusRs:
 async def main():
     result = await process("d2t", [
         "/home/petr/projects/mltests/workspace/demos/p1.png"
-    ] * 20)
+    ] * 1)
     print(result)
 
     # result = await client.process("t2d", [TaskDataT2D(text="Generate diagram", props={})])

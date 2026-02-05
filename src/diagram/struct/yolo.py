@@ -21,12 +21,13 @@ def convert(dets) -> DetectorOutput:
         for x, y, v in line:
             x, y = int(x), int(y)
             if v < 0.2: continue
-            line_out.append((x, y))
+            line_out.append((int(x), int(y)))
             # line_out.append((x / w, y / h))
         if line_out:
-            result.lines.append(DetectorLine(DetectorLineType(classifier), line_out))
+            result.lines.append(DetectorLine(type=DetectorLineType(classifier), line=line_out))
         else:
-            result.objects.append(DetectorObject(DetectorObjectType(classifier), (bbox_x, bbox_y, bbox_x2, bbox_y2)))
+            bbox = (bbox_x, bbox_y, bbox_x2, bbox_y2)
+            result.objects.append(DetectorObject(type=DetectorObjectType(classifier), bbox=tuple(int(k) for k in bbox)))
             # result.objects.append(DetectorObject(DetectorObjectType(classifier), (bbox_x / w, bbox_y/h, bbox_x2 / w, bbox_y2/h)))
     return result
 
