@@ -25,3 +25,5 @@ dataset/input/
 dataset/out_*/
 
 tmp/
+
+!/src/ingress/mlclient/build/

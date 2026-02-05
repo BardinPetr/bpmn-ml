@@ -18,9 +18,9 @@ import {
     Checkbox,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ReactMarkdown from 'react-markdown';
+import Markdown from 'react-markdown';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = window.location.origin;
 
 interface SubmitRs {
     request_id: string;
@@ -125,7 +125,7 @@ const App: React.FC = () => {
                 </FormControl>
                 <FormControlLabel
                     control={<Checkbox checked={visualize} onChange={(e) => setVisualize(e.target.checked)} />}
-                    label="Explain/Visualize"
+                    label="Visualize"
                     sx={{ml: 2}}
                 />
                 <Button variant="contained" onClick={submit} disabled={files.length === 0} sx={{ml: 2}}>Upload</Button>
@@ -152,7 +152,7 @@ const App: React.FC = () => {
                                 <>
                                     {task.result.description && (
                                         <Paper sx={{p: 2, mb: 2}}>
-                                            <ReactMarkdown>{task.result.description}</ReactMarkdown>
+                                            <Markdown>{task.result.description}</Markdown>
                                         </Paper>
                                     )}
                                     {task.result.time_ms !== undefined && (

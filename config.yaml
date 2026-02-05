@@ -30,7 +30,6 @@ applications:
 
   - name: analyzer
     route_prefix: /analyzer
-#    import_path: src.diagram.executor:app
     import_path: src.diagram.main:app
     runtime_env: { }
     deployments:

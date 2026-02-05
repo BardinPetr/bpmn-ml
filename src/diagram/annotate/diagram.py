@@ -1,5 +1,4 @@
-import uuid
-
+from src.diagram.annotate.tools import buid, cfirst
 from src.diagram.description_models import DiagramContents, GBPMNElement, GBPMNElementType, GBPMNElementSubType, \
     GBPMNFlowType, GBPMNFlow
 from src.diagram.struct.model import DetectorOutput, DetectorObjectType, DetectorLineType, DetectorObject, DetectorLine
@@ -63,14 +62,14 @@ class DiagramElementsGenerator:
         for i in self.detector_data.objects:
             typ = self.__o_type(i)
             out.elements.append(GBPMNElement(
-                id=str(uuid.uuid4()),
+                id=buid(cfirst(typ.value.replace("_", ""))),
                 type=typ,
                 subtype=self.__o_subtype(typ, i),
                 bbox=i.bbox
             ))
         for i in self.detector_data.lines:
             out.links.append(GBPMNFlow(
-                id=str(uuid.uuid4()),
+                id=buid("Flow"),
                 type=self.__l_type(i),
                 line=i.line
             ))

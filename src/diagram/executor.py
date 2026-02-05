@@ -76,7 +76,7 @@ class DiagramAnalyzer:
         graph_builder = GraphBuilder(contents, diagram)
         graph = graph_builder()
 
-        res.description = make_description(diagram, graph)
+        res.description = make_description(contents)
 
         if do_visualize:
             graph_lay = graph_builder.create_layout()

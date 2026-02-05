@@ -2,15 +2,18 @@ import asyncio
 import json
 import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import List
 
 from fastapi import FastAPI, HTTPException, Response, UploadFile, Form
+from fastapi.middleware.cors import CORSMiddleware
 from ray import serve
-from src.ingress.task.task_manager import app as task_manager_app
+from starlette.staticfiles import StaticFiles
+
 from src.ingress.api.model import TaskStatus, SubmitRs, StatusRs, InternalTaskBlock, SubsystemType, TaskDataT2D, \
     FileData, \
     TaskDataD2T
-from fastapi.middleware.cors import CORSMiddleware
+from src.ingress.task.task_manager import app as task_manager_app
 
 fastapi_app = FastAPI()
 fastapi_app.add_middleware(
@@ -21,17 +24,24 @@ fastapi_app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @serve.deployment(ray_actor_options={"num_cpus": 0.1})
 @serve.ingress(fastapi_app)
 class APIIngress:
     def __init__(self, task_service_handle):
         self.task_service = task_service_handle
 
+        fastapi_app.mount("/",
+                          app=StaticFiles(directory=Path(__file__).parent.parent.resolve() / "mlclient" / "build",
+                                          html=True),
+                          name="static")
+
     @fastapi_app.post("/submit/d2t", response_model=SubmitRs)
     async def submit_task_2t(self,
                              files: List[UploadFile],
                              parameters: str = Form(...)) -> SubmitRs:
         props = json.loads(parameters)
+
         async def __load(file: UploadFile):
             return TaskDataD2T(image=FileData(data=await file.read(), content_type=file.content_type),
                                props=props)

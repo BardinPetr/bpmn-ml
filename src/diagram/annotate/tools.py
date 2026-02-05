@@ -1,4 +1,6 @@
+import base64
 import math
+import uuid
 from typing import List
 
 from src.diagram.description_models import GBPMNElementType, GBPMNElement, GBPMNFlow
@@ -103,3 +105,16 @@ def get_bboxlist_centers(bboxes: List):
 
 def get_links_coordinate(links: List[GBPMNFlow]):
     return [link.line for link in links]
+
+
+def buid(typ: str = "obj") -> str:
+    return f"{typ}_{uuid.uuid4().hex}"
+
+
+def cfirst(x):
+    return x[0].upper() + x[1:]
+
+
+def b64(x):
+    x = str(x or "")
+    return base64.b64encode(x.encode()).decode()

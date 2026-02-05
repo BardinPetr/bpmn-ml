@@ -1,6 +1,4 @@
-from uuid import uuid4
-
-from src.diagram.annotate.tools import rank, iou_metrics
+from src.diagram.annotate.tools import rank, iou_metrics, buid
 from src.diagram.description_models import *
 
 AGGREGATED_ETYPES = {GBPMNElementType.VIRT_LANE, GBPMNElementType.VIRT_PROC}
@@ -35,7 +33,7 @@ class DiagramNestBinder:
             lanes = self.__scan_internals(proc.bbox, source=self.__lanes(), cutoff=0.7)
             if not lanes:
                 lanes = [GBPMNElement(
-                    id=str(uuid4()),
+                    id=str(buid("Lane")),
                     label=proc.label,
                     type=GBPMNElementType.VIRT_LANE,
                     bbox=proc.bbox,

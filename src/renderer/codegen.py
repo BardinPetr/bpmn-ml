@@ -1,8 +1,7 @@
-import base64
-
 import networkx as nx
 import numpy as np
 
+from src.diagram.annotate.tools import cfirst, b64
 from src.diagram.description_models import GBPMNElementType, GBPMNElementSubType
 
 TYPE_MAP = {
@@ -12,15 +11,6 @@ TYPE_MAP = {
     (GBPMNElementType.GATEWAY, GBPMNElementSubType.GATEWAY_PARALLEL): "bpmn:ParallelGateway",
     (GBPMNElementType.GATEWAY, GBPMNElementSubType.GATEWAY_INCLUSIVE): "bpmn:InclusiveGateway",
 }
-
-
-def cfirst(x):
-    return x[0].upper() + x[1:]
-
-
-def b64(x):
-    x = str(x or "")
-    return base64.b64encode(x.encode()).decode()
 
 
 def layout_pos(lay, uid, b_shift, b_range, b_scale, sz=(640, 480)):
