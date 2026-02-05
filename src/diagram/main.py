@@ -1,61 +1,38 @@
-import asyncio
+import time
 
 import cv2
+import numpy as np
 from ray import serve
-from ray.serve.handle import DeploymentHandle
+from ray.serve.task_consumer import task_consumer, task_handler
 
-from src.diagram.annotate.binder import DiagramLinkBinder
-from src.diagram.annotate.builder import DiagramBuilder
-from src.diagram.annotate.diagram import DiagramElementsGenerator
-from src.diagram.annotate.graphgen import GraphBuilder
-from src.diagram.annotate.labeler import Labeler
-from src.diagram.annotate.nest import DiagramNestBinder
-from src.diagram.ocr.main import OCRProcess
-from src.diagram.struct.yolo import ObjectLineDetector
-from src.renderer.codegen import GraphBPMNCodegen
-from src.renderer.main import BPMNRendererService
+from src.diagram.executor import app as executor_app
+from src.ingress.task.task_proc_config import TASK_PROCESSOR_CONFIG
 
 
 @serve.deployment(ray_actor_options={"num_cpus": 0.1})
-class DiagramAnalyzer:
-    def __init__(self,
-                 struct_detector: DeploymentHandle[ObjectLineDetector],
-                 text_detector: DeploymentHandle[ObjectLineDetector],
-                 renderer: DeploymentHandle[BPMNRendererService]):
-        self.struct_detector = struct_detector
-        self.text_detector = text_detector
-        self.renderer = renderer
-        asyncio.get_event_loop().create_task(self())
+@task_consumer(task_processor_config=TASK_PROCESSOR_CONFIG)
+class DiagramAnalyzerTask:
+    def __init__(self, executor):
+        self.executor = executor
 
-    async def __call__(self):
-        img = cv2.imread(
-            "/home/petr/projects/mltests/dataset/out_image/0e5e7c91e225dd48e344d35c90e62fa7e867890268dd94df219d8b2eff0356aa.0.jpg")
-        do_vis = True
-
-        detector_out, ocr = await asyncio.gather(
-            self.struct_detector.remote(img),
-            self.text_detector.remote(img),
-        )
-
-        with open("a.json", "w") as f:
-            f.write(detector_out.model_dump_json())
-        with open("b.json", "w") as f:
-            f.write(ocr.model_dump_json())
-
-        contents = DiagramElementsGenerator(detector_out)()
-        contents = Labeler(detector_out, ocr).run(contents)
-        contents = DiagramNestBinder(contents)()
-        contents = DiagramLinkBinder(contents)()
-        diagram = DiagramBuilder(contents)()
-        graph_builder = GraphBuilder(contents, diagram)
-        graph = graph_builder()
-
-        if do_vis:
-            graph_lay = graph_builder.create_layout()
-            graph_vis_png = graph_builder.visualize()
-            code = GraphBPMNCodegen()(graph, graph_lay, scale=2, target_size=(640, 480))
-            renders = await self.renderer.remote(code)
+    @task_handler(name="task_d2t")
+    def task_d2t(self, rq) -> dict:
+        try:
+            print(f"TASK BEGIN")
+            t = time.time()
+            img = cv2.imdecode(np.frombuffer(rq['image'], np.uint8), cv2.IMREAD_COLOR)
+            res = self.executor.remote(
+                img,
+                do_visualize=rq.get('visualize', False),
+                lang=rq.get('language', None)
+            ).result()
+            print(f"TASK END {(time.time() - t) * 1000:.0f}ms")
+            return res.model_dump()
+        except Exception as e:
+            print(f"Task Error: {e}")
+            return dict(success=False)
+        finally:
+            pass
 
 
-app = DiagramAnalyzer.bind(ObjectLineDetector.bind(), OCRProcess.bind(), BPMNRendererService.bind())
-# app = DiagramAnalyzerTask.bind()
+app = DiagramAnalyzerTask.bind(executor_app)

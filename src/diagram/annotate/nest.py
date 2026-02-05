@@ -34,22 +34,22 @@ class DiagramNestBinder:
         for proc in self.__processes():
             lanes = self.__scan_internals(proc.bbox, source=self.__lanes(), cutoff=0.7)
             if not lanes:
-                fallback_lane = GBPMNElement(
+                lanes = [GBPMNElement(
                     id=str(uuid4()),
                     label=proc.label,
                     type=GBPMNElementType.VIRT_LANE,
                     bbox=proc.bbox,
-                )
-                lanes = [fallback_lane]
+                )]
 
             lids = []
             for lane in lanes:
+                lid = lane.id
                 lane_content = self.__scan_internals(lane.bbox, source=self.basic_elements, cutoff=0.9)
-                lane = GBPMNLaneElement(**lane.model_dump(),
-                                        process_id=proc.id,
-                                        nested_ids=[i.id for i in lane_content])
-                lids.append(lane.id)
-                self.data.drop(lane.id)
+                lane = GBPMNLaneElement(**{**lane.model_dump(),
+                                           "process_id": proc.id,
+                                           "nested_ids": [i.id for i in lane_content]})
+                lids.append(lid)
+                self.data.drop(lid)
                 self.data.add(lane)
 
             proc = GBPMNProcessElement(**proc.model_dump(), lanes_ids=lids)

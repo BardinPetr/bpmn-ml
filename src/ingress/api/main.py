@@ -1,9 +1,10 @@
 import asyncio
+import json
 import uuid
 from datetime import datetime
 from typing import List
 
-from fastapi import FastAPI, HTTPException, Response, UploadFile
+from fastapi import FastAPI, HTTPException, Response, UploadFile, Form
 from ray import serve
 from src.ingress.task.task_manager import app as task_manager_app
 from src.ingress.api.model import TaskStatus, SubmitRs, StatusRs, InternalTaskBlock, SubsystemType, TaskDataT2D, \
@@ -27,10 +28,15 @@ class APIIngress:
         self.task_service = task_service_handle
 
     @fastapi_app.post("/submit/d2t", response_model=SubmitRs)
-    async def submit_task_2t(self, files: List[UploadFile]) -> SubmitRs:
+    async def submit_task_2t(self,
+                             files: List[UploadFile],
+                             parameters: str = Form(...)) -> SubmitRs:
+        print(parameters)
+        print(files)
+        props = json.loads(parameters)
         async def __load(file: UploadFile):
             return TaskDataD2T(image=FileData(data=await file.read(), content_type=file.content_type),
-                               props={})
+                               props=props)
 
         request_id = str(uuid.uuid4())
         submitted_at = datetime.now()

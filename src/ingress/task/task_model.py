@@ -13,19 +13,13 @@ class DiagramAnalyzeTaskRq(BaseModel):
 class DiagramAnalyzeTaskRs(BaseModel):
     success: bool = False
     description: str = ""
-    bpmn_xml: str = ""
-    visualization: List[bytes] = field(default_factory=list)
     files: List[FileData] = field(default_factory=list)
 
     def as_task_result(self) -> TaskResult:
         return TaskResult(
             status=TaskStatus.SUCCESS if self.success else TaskStatus.FAILURE,
             result=dict(description=self.description),
-            files=[
-                FileData(data=self.bpmn_xml.encode(), content_type="application/xml", filename="bpmn.xml"),
-                *[FileData(data=v, content_type="image/png", filename=f"out.{i}.png")
-                  for i, v in enumerate(self.visualization)]
-            ]
+            files=self.files
         )
 
 

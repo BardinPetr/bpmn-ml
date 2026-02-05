@@ -5,14 +5,24 @@ from src.diagram.description_models import DiagramContents, GBPMNElement, GBPMNE
 from src.diagram.struct.model import DetectorOutput, DetectorObjectType, DetectorLineType, DetectorObject, DetectorLine
 
 DOT2ET = {
-    DetectorObjectType.EVENT: GBPMNElementType.EVENT_START,
-    # DetectorObjectType.EVENT: GBPMNElementType.EVENT_END,
-    # DetectorObjectType.EVENT: GBPMNElementType.EVENT_THROW,
-    # DetectorObjectType.EVENT: GBPMNElementType.EVENT_CATCH,
-    DetectorObjectType.GATEWAY: GBPMNElementType.GATEWAY,
+    DetectorObjectType.EVENT_START: GBPMNElementType.EVENT_START,
+    DetectorObjectType.EVENT_END: GBPMNElementType.EVENT_END,
+    DetectorObjectType.EVENT_THROW: GBPMNElementType.EVENT_THROW,
+    DetectorObjectType.EVENT_CATCH: GBPMNElementType.EVENT_CATCH,
+    DetectorObjectType.GATEWAY_PARALLEL: GBPMNElementType.GATEWAY,
+    DetectorObjectType.GATEWAY_INCLUSIVE: GBPMNElementType.GATEWAY,
+    DetectorObjectType.GATEWAY_EXCLUSIVE: GBPMNElementType.GATEWAY,
+    DetectorObjectType.GATEWAY_EVENT_BASED: GBPMNElementType.GATEWAY,
     DetectorObjectType.TASK: GBPMNElementType.TASK,
     DetectorObjectType.LANE: GBPMNElementType.VIRT_LANE,
     DetectorObjectType.PROCESS: GBPMNElementType.VIRT_PROC
+}
+
+DOT2EST = {
+    DetectorObjectType.GATEWAY_PARALLEL: GBPMNElementSubType.GATEWAY_PARALLEL,
+    DetectorObjectType.GATEWAY_INCLUSIVE: GBPMNElementSubType.GATEWAY_INCLUSIVE,
+    DetectorObjectType.GATEWAY_EXCLUSIVE: GBPMNElementSubType.GATEWAY_EXCLUSIVE,
+    DetectorObjectType.GATEWAY_EVENT_BASED: GBPMNElementSubType.GATEWAY_EVENT
 }
 
 DLT2FT = {
@@ -35,12 +45,12 @@ class DiagramElementsGenerator:
         if type == GBPMNElementType.TASK:
             return GBPMNElementSubType.TASK_OTHER
         if type == GBPMNElementType.GATEWAY:
-            return GBPMNElementSubType.GATEWAY_EXCLUSIVE  # TODO fuck
+            return DOT2EST.get(type, GBPMNElementSubType.GATEWAY_EXCLUSIVE)
         if type in {GBPMNElementType.EVENT_START,
                     GBPMNElementType.EVENT_THROW,
                     GBPMNElementType.EVENT_CATCH,
                     GBPMNElementType.EVENT_END}:
-            return GBPMNElementSubType.EVENT_OTHER  # TODO fuck
+            return GBPMNElementSubType.EVENT_OTHER
         return None
 
     def __l_type(self, x: DetectorLine):

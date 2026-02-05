@@ -24,7 +24,7 @@ class TaskManager:
         if isinstance(rq, TaskDataT2D):
             return dict(text=rq.text)
         elif isinstance(rq, TaskDataD2T):
-            return DiagramAnalyzeTaskRq(image=rq.image.data).model_dump()
+            return dict(image=rq.image.data, **rq.props)
         return None
 
     async def new_request(self, request: InternalTaskBlock):
@@ -73,7 +73,7 @@ class TaskManager:
         print(f"out rq {request_id} {task_id} {file_num}")
         try:
             res: RayTaskResult = self.task_adapter.get_task_status_sync(task_id)
-            print(f"out tid={task_id} {res}")
+            print(f"out tid={task_id} {res.status}")
             return DiagramAnalyzeTaskRs(**res.result).as_task_result().files[int(file_num)]
         except:
             return None

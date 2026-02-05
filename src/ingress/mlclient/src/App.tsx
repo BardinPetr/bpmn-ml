@@ -10,6 +10,12 @@ import {
     LinearProgress,
     Paper,
     Typography,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    FormControlLabel,
+    Checkbox,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -45,6 +51,8 @@ const App: React.FC = () => {
     const [requestId, setRequestId] = useState<string | null>(null);
     const [status, setStatus] = useState<StatusRs | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [language, setLanguage] = useState<string>('en');
+    const [visualize, setVisualize] = useState<boolean>(false);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) setFiles(Array.from(e.target.files));
@@ -53,6 +61,8 @@ const App: React.FC = () => {
     const submit = async () => {
         const formData = new FormData();
         files.forEach(f => formData.append('files', f));
+        const parameters = JSON.stringify({ language, visualize });
+        formData.append('parameters', parameters);
         try {
             const res = await fetch(`${API_BASE}/submit/d2t`, {
                 method: 'POST',
@@ -103,7 +113,19 @@ const App: React.FC = () => {
             <Typography variant="h4" gutterBottom>ML Image Analyzer</Typography>
             <Paper sx={{p: 2, mb: 2}}>
                 <input type="file" multiple accept="image/*" onChange={handleFileChange}/>
-                <Button variant="contained" onClick={submit} disabled={files.length === 0}>Upload</Button>
+                <FormControl sx={{minWidth: 120, ml: 2}}>
+                    <InputLabel>Language</InputLabel>
+                    <Select value={language} label="Language" onChange={(e) => setLanguage(e.target.value)}>
+                        <MenuItem value="en">en</MenuItem>
+                        <MenuItem value="ru">ru</MenuItem>
+                    </Select>
+                </FormControl>
+                <FormControlLabel
+                    control={<Checkbox checked={visualize} onChange={(e) => setVisualize(e.target.checked)} />}
+                    label="Explain/Visualize"
+                    sx={{ml: 2}}
+                />
+                <Button variant="contained" onClick={submit} disabled={files.length === 0} sx={{ml: 2}}>Upload</Button>
                 {error && <Alert severity="error">{error}</Alert>}
             </Paper>
             {requestId && status && (

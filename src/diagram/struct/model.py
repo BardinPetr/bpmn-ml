@@ -6,13 +6,19 @@ from pydantic import BaseModel
 
 
 class DetectorObjectType(IntEnum):
-    EVENT = 0
-    GATEWAY = 1
-    MESSAGE_FLOW = 2
-    LANE = 3
-    PROCESS = 4
-    SEQUENCE_FLOW = 5
-    TASK = 6
+    EVENT_END = 0
+    GATEWAY_EVENT_BASED = 1
+    GATEWAY_EXCLUSIVE = 2
+    GATEWAY_INCLUSIVE = 3
+    MESSAGE_FLOW = 4
+    EVENT_CATCH = 5
+    EVENT_THROW = 6
+    LANE = 7
+    GATEWAY_PARALLEL = 8
+    PROCESS = 9
+    SEQUENCE_FLOW = 10
+    EVENT_START = 11
+    TASK = 12
 
     def __repr__(self):
         return self.name
@@ -22,8 +28,8 @@ class DetectorObjectType(IntEnum):
 
 
 class DetectorLineType(IntEnum):
-    MESSAGE = 2
-    SEQUENCE = 5
+    MESSAGE = int(DetectorObjectType.MESSAGE_FLOW.value)
+    SEQUENCE = int(DetectorObjectType.SEQUENCE_FLOW.value)
 
     def __repr__(self):
         return self.name

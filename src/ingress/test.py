@@ -1,4 +1,5 @@
 import asyncio
+import json
 import random
 import re
 import time
@@ -6,6 +7,7 @@ from pathlib import Path
 from typing import List
 
 import httpx
+import requests
 from rich import print
 
 from src.ingress.api.model import StatusRs, TaskStatus
@@ -21,7 +23,10 @@ async def process(subsystem, tasks: List) -> StatusRs:
                 ("files", (Path(f).name, open(f, "rb"), "image/jpeg"))
                 for f in tasks
             ]
-            rs = await client.post(f"{base_url}/submit/d2t", files=files)
+            rs = await client.post(f"{base_url}/submit/d2t",
+                                   files=files,
+                                   data=dict(parameters=json.dumps(dict(language='en', visualize=True)))
+                                   )
         else:
             rs = await client.post(f"{base_url}/submit/t2d", json=[t.model_dump() for t in tasks])
 
@@ -48,14 +53,14 @@ async def process(subsystem, tasks: List) -> StatusRs:
         print(f"< {request_id} {(time.time() - ts) * 1000:.0f}ms")
         return status
 
-
 async def main():
     result = await process("d2t", [
-        "/home/petr/projects/mltests/workspace/demos/p1.png"
+        "/home/petr/projects/mltests/dataset/out_image/0e5e7c91e225dd48e344d35c90e62fa7e867890268dd94df219d8b2eff0356aa.0.jpg"
     ] * 1)
     print(result)
-
-    # result = await client.process("t2d", [TaskDataT2D(text="Generate diagram", props={})])
+    # ts = time.time()
+    # requests.get(f"{base_url}/analyzer")
+    # print(time.time() - ts)
 
 
 if __name__ == "__main__":

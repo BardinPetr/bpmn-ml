@@ -16,26 +16,27 @@ logging_config:
   additional_log_standard_attrs: [ ]
 
 applications:
-#  - name: ingress
-#    route_prefix: /
-#    import_path: src.ingress.api.main:app
-#    runtime_env: { }
-#    deployments:
-#      - name: APIIngress
-#        num_replicas: 1
-#        max_ongoing_requests: 100
-#      - name: TaskManager
-#        num_replicas: 1
-#        max_ongoing_requests: 100
+  - name: ingress
+    route_prefix: /
+    import_path: src.ingress.api.main:app
+    runtime_env: { }
+    deployments:
+      - name: APIIngress
+        num_replicas: 1
+        max_ongoing_requests: 100
+      - name: TaskManager
+        num_replicas: 1
+        max_ongoing_requests: 100
 
   - name: analyzer
     route_prefix: /analyzer
+#    import_path: src.diagram.executor:app
     import_path: src.diagram.main:app
     runtime_env: { }
     deployments:
-#      - name: DiagramAnalyzerTask
-#        num_replicas: 5
-#        max_ongoing_requests: 1
+      - name: DiagramAnalyzerTask
+        num_replicas: 1
+        max_ongoing_requests: 100
       - name: DiagramAnalyzer
         num_replicas: 1
         max_ongoing_requests: 1
@@ -43,5 +44,8 @@ applications:
         num_replicas: 1
         max_ongoing_requests: 1
       - name: OCRProcess
+        num_replicas: 2
+        max_ongoing_requests: 1
+      - name: BPMNRendererService
         num_replicas: 1
         max_ongoing_requests: 1

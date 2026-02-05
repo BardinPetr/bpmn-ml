@@ -3,6 +3,7 @@ import pathlib
 import time
 
 import cv2
+import numpy as np
 from ray import serve
 from ultralytics import YOLO
 
@@ -35,8 +36,14 @@ def convert(dets) -> DetectorOutput:
 @serve.deployment(ray_actor_options={"num_cpus": 0.5})
 class ObjectLineDetector:
     def __init__(self):
-        model_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "shapes_edges_v1.onnx")
+        model_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "v2.onnx")
         self.__model = YOLO(model_path, task='pose')
+        print("[DET] loading")
+        try:
+            self.__model(np.array([]))
+        except:
+            pass
+        print("[DET] loading done")
 
     def __call__(self, img) -> DetectorOutput:
         img = cv2.cvtColor(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), cv2.COLOR_GRAY2BGR)

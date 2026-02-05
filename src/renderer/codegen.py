@@ -1,3 +1,5 @@
+import base64
+
 import networkx as nx
 import numpy as np
 
@@ -16,13 +18,20 @@ def cfirst(x):
     return x[0].upper() + x[1:]
 
 
+def b64(x):
+    x = str(x)
+    return base64.b64encode(x.encode()).decode()
+
+
 def layout_pos(lay, uid, b_shift, b_range, b_scale, sz=(640, 480)):
     return (lay[uid] - b_shift) / b_range * b_scale * np.array(sz)
+
 
 def layout_analyze(lay):
     all_pts = np.array(list(lay.values()))
     p_min, p_max = all_pts.min(axis=0), all_pts.max(axis=0)
-    return dict(b_range = p_max - p_min, b_shift=p_min)
+    return dict(b_range=p_max - p_min, b_shift=p_min)
+
 
 class GraphBPMNCodegen:
     def __init__(self):
@@ -42,10 +51,12 @@ class GraphBPMNCodegen:
             bpmn_type = f"bpmn:{cfirst(typ)}"
             bpmn_tdef = f"bpmn:{cfirst(subtyp)}"
         px, py = loc
-        self.add(f"makeElement('{uid}', '{name}', '{bpmn_type}', '{bpmn_tdef}', {px}, {py}, '{process_id}');")
+        name = b64(name)
+        self.add(f"makeElement('{uid}', `{name}`, '{bpmn_type}', '{bpmn_tdef}', {px}, {py}, '{process_id}');")
 
     def add_edge(self, uid1, uid2, label):
-        self.add(f"makeLink('{uid1}', '{uid2}', '{label}');")
+        label = b64(label)
+        self.add(f"makeLink('{uid1}', '{uid2}', `{label}`);")
 
     def __str__(self):
         return "\n".join(self.code)
